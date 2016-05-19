@@ -1,6 +1,6 @@
 package ru.cadmy.network;
 
-import org.apache.log4j.Logger;
+import org.apache.log4j.*;
 
 import java.io.*;
 import java.net.*;
@@ -15,6 +15,10 @@ public class PingMe {
 	private final static String DEFAULT_CREDITIANLS = "admin admin";
 	
 	public static void main(String[] args){
+
+        String log4jConfPath = "log4j.properties";
+        PropertyConfigurator.configure(log4jConfPath);
+
 		ArrayList<String> credits = loadCredentials();
 		if (args.length > 0) {
 			String ip = args[0];
