@@ -1,29 +1,21 @@
 package ru.cadmy.network;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.PasswordAuthentication;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Scanner;
+import org.apache.log4j.Logger;
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
 public class PingMe {
-	
-	private final static String REACHABLE_LIST = "reachable_list.txt";
-	private final static String CRACKED_LIST = "cracked_list.txt";
+
+    static final Logger reachableList = Logger.getLogger("reachableLogger");
+    static final Logger crackedList = Logger.getLogger("crackedLogger");
+
 	private final static String CREDITIANLS_LIST = "creditianls.txt";
 	private final static String DEFAULT_CREDITIANLS = "admin admin";
 	
 	public static void main(String[] args){
-		ArrayList<String> credits = loadCreditianls();
+		ArrayList<String> credits = loadCredentials();
 		if (args.length > 0) {
 			String ip = args[0];
 			String[] parts = ip.split("\\.");
@@ -51,13 +43,14 @@ public class PingMe {
 				try {
 					inet = InetAddress.getByName(t);
 					if (inet.isReachable(2000)) {
-						writeToReachableList(t);
+                        System.out.println(t + " reached");
+                        reachableList.trace(t);
 						for  (String str : credits)
 						{
 							pair  = str.split(" ");
-							//System.out.println(" - " + t + " \"" + pair[0] + "\" \"" + pair[1] + "\"");
+							System.out.println(" - " + t + " \"" + pair[0] + "\" \"" + pair[1] + "\"");
 							if (login(t, pair[0], pair[1]) == true) {
-								writeToCrackedList(t, pair[0], pair[1]);
+                                crackedList.trace(t + " " + pair[0] + " " + pair[1]);
 								break;
 							}	
 						}
@@ -71,46 +64,10 @@ public class PingMe {
 		}
 	}
 
-	private static void writeToReachableList(String ip) {
-		try {
-            FileWriter fileWriter =
-                new FileWriter(REACHABLE_LIST);
-
-            BufferedWriter bufferedWriter =
-                new BufferedWriter(fileWriter);
-            bufferedWriter.write(ip);
-            bufferedWriter.newLine();
-            bufferedWriter.close();
-        }
-        catch(IOException ex) {
-            System.out.println("Error writing to file '"+ REACHABLE_LIST + "'");
-        }
-	}
-	
-	private static void writeToCrackedList(String ip, String login, String password) {
-		try {
-            FileWriter fileWriter =
-                new FileWriter(CRACKED_LIST);
-
-            BufferedWriter bufferedWriter =
-                new BufferedWriter(fileWriter);
-            bufferedWriter.write(ip);
-            bufferedWriter.write(" ");
-            bufferedWriter.write(login);
-            bufferedWriter.write(" ");
-            bufferedWriter.write(password);
-            bufferedWriter.newLine();
-            bufferedWriter.close();
-        }
-        catch(IOException ex) {
-            System.out.println("Error writing to file '"+ CRACKED_LIST + "'");
-        }
-	}
-
-	private static ArrayList<String> loadCreditianls() {
+	private static ArrayList<String> loadCredentials() {
         
         String line = null;
-        ArrayList<String> creditianls = new ArrayList<>();
+        ArrayList<String> credentials = new ArrayList<>();
 		try {
 
             FileReader fileReader = 
@@ -120,15 +77,15 @@ public class PingMe {
                 new BufferedReader(fileReader);
 
             while((line = bufferedReader.readLine()) != null) {
-            	creditianls.add(line);
+                credentials.add(line);
             }   
 
             bufferedReader.close(); 
             
-            return creditianls; 
+            return credentials;
         } catch(IOException e) {
-        	creditianls.add(DEFAULT_CREDITIANLS);
-        	return creditianls;           
+            credentials.add(DEFAULT_CREDITIANLS);
+        	return credentials;
         } 
 		
 	}
@@ -144,7 +101,10 @@ public class PingMe {
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			Scanner scanner = new Scanner(connection.getInputStream());
 			scanner.useDelimiter("\\Z");
-			scanner.next();	
+            if (scanner.hasNext())
+            {
+                scanner.next();
+            }
 		} catch (ProtocolException e) {
 			return false;
 		} catch (IOException e) {
