@@ -105,6 +105,7 @@ public class PingMe {
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			Scanner scanner = new Scanner(connection.getInputStream());
 			scanner.useDelimiter("\\Z");
+            //TODO 213.180.193.3 check both with router and site
             if (scanner.hasNext())
             {
                 scanner.next();
