@@ -112,7 +112,5 @@ public class PingMe {
 		}
 		return true;
 	}
-	
-	
 
 }
