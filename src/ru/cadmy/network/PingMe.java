@@ -46,7 +46,7 @@ public class PingMe {
 				System.out.println("Analyzing " + t);
 				try {
 					inet = InetAddress.getByName(t);
-					if (inet.isReachable(2000)) {
+					if (inet.isReachable(10000)) {
                         System.out.println(t + " reached");
                         reachableList.trace(t);
 						for  (String str : credits)
@@ -109,6 +109,8 @@ public class PingMe {
             if (scanner.hasNext())
             {
                 scanner.next();
+            } else {
+                return false;
             }
 		} catch (ProtocolException e) {
 			return false;
